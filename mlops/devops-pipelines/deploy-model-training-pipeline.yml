@@ -11,6 +11,14 @@ variables:
 - name: version
   value: aml-cli-v2
 
+
+trigger:
+- none
+
+pool:
+  vmImage: ubuntu-20.04
+
+
 resources:
   repositories:
     - repository: mlops-templates  # Template Repo
@@ -18,12 +26,11 @@ resources:
       endpoint: github-connection # need to set up and hardcode
       type: github
       ref: main
-      
-trigger:
-- none
-
-pool:
-  vmImage: ubuntu-20.04
+    - repository: rai-vnext-preview  # Template Repo
+      name: Azure/rai-vnext-preview # need to change org name from "Azure" to your own org
+      endpoint: github-connection # need to set up and hardcode
+      type: github
+      ref: main
 
 stages:
 - stage: DeployTrainingPipeline
@@ -44,11 +51,18 @@ stages:
         parameters:
           build_type: conda
           environment_name: taxi-train-env
-          environment_file: mlops/azureml/train/environment.yml
+          environment_file: mlops/azureml/train/train-env.yml
           enable_monitoring: $(enable_monitoring)
+      - checkout: rai-vnext-preview
+        path: s/
+      - template: register-rai-components.yml
+      - checkout: self
+        path: s/
+      - checkout: mlops-templates
+        path: s/templates/
       - template: templates/${{ variables.version }}/run-pipeline.yml@mlops-templates
         parameters: 
-          pipeline_file: mlops/azureml/train/pipeline_rai.yml
+          pipeline_file: mlops/azureml/train/pipeline.yml
           experiment_name: $(environment)_taxi_fare_train_$(Build.SourceBranchName)
           display_name: $(environment)_taxi_fare_run_$(Build.BuildID)
           enable_monitoring: $(enable_monitoring)
