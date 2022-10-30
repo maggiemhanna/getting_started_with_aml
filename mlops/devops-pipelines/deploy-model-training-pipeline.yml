@@ -48,7 +48,7 @@ stages:
           enable_monitoring: $(enable_monitoring)
       - template: templates/${{ variables.version }}/run-pipeline.yml@mlops-templates
         parameters: 
-          pipeline_file: mlops/azureml/train/pipeline_rai.yml
+          pipeline_file: mlops/azureml/train/pipeline.yml
           experiment_name: $(environment)_taxi_fare_train_$(Build.SourceBranchName)
           display_name: $(environment)_taxi_fare_run_$(Build.BuildID)
           enable_monitoring: $(enable_monitoring)
